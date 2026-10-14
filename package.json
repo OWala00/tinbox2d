@@ -1,0 +1,10 @@
+{
+  "name": "tinbox2d",
+  "version": "0.1.0",
+  "description": "a small 2d physics engine, built from scratch",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "license": "MIT"
+}
