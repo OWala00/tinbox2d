@@ -26,6 +26,10 @@ export function createWorld() {
     return alive.has(id);
   }
 
+  function entities() {
+    return alive.values();
+  }
+
   function storeFor(type) {
     let store = stores.get(type);
     if (!store) {
@@ -58,6 +62,7 @@ export function createWorld() {
     createEntity,
     destroyEntity,
     isAlive,
+    entities,
     addComponent,
     getComponent,
     removeComponent,
