@@ -1,6 +1,6 @@
-// bodies here are plain objects: { position: {x,y}, invMass: number }.
-// invMass of 0 means static/infinite mass. manifold is { normal, depth }
-// as produced by narrowphase.js, with normal pointing from a toward b.
+// bodies here are plain objects: { position: {x,y}, velocity: {x,y},
+// invMass: number }. invMass of 0 means static/infinite mass. manifold is
+// { normal, depth } as produced by narrowphase.js, normal pointing a -> b.
 
 export function resolvePosition(a, b, manifold) {
   const totalInvMass = a.invMass + b.invMass;
@@ -11,4 +11,27 @@ export function resolvePosition(a, b, manifold) {
   a.position.y -= manifold.normal.y * correction * a.invMass;
   b.position.x += manifold.normal.x * correction * b.invMass;
   b.position.y += manifold.normal.y * correction * b.invMass;
+}
+
+// restitution of 1 is a perfectly elastic bounce, 0 is perfectly inelastic
+// (bodies end up moving together along the normal). returns the scalar
+// impulse magnitude applied along the normal, used later to clamp friction.
+export function resolveVelocity(a, b, manifold, restitution) {
+  const totalInvMass = a.invMass + b.invMass;
+  if (totalInvMass === 0) return 0;
+
+  const relVel = { x: b.velocity.x - a.velocity.x, y: b.velocity.y - a.velocity.y };
+  const velAlongNormal = relVel.x * manifold.normal.x + relVel.y * manifold.normal.y;
+  // already separating, don't add an impulse that would pull them together
+  if (velAlongNormal > 0) return 0;
+
+  const j = (-(1 + restitution) * velAlongNormal) / totalInvMass;
+  const impulse = { x: manifold.normal.x * j, y: manifold.normal.y * j };
+
+  a.velocity.x -= impulse.x * a.invMass;
+  a.velocity.y -= impulse.y * a.invMass;
+  b.velocity.x += impulse.x * b.invMass;
+  b.velocity.y += impulse.y * b.invMass;
+
+  return j;
 }

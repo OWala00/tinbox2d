@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolvePosition } from '../src/physics/resolver.js';
+import { resolvePosition, resolveVelocity } from '../src/physics/resolver.js';
 
 const body = (x, y, invMass) => ({ position: { x, y }, invMass });
+const bodyWithVel = (vx, vy, invMass) => ({ velocity: { x: vx, y: vy }, invMass });
 
 test('equal-mass overlapping bodies separate equally in opposite directions', () => {
   const a = body(0, 0, 1);
@@ -44,4 +45,47 @@ test('heavier body (lower invMass) moves less than the lighter one', () => {
   const heavyMoved = Math.abs(0 - heavy.position.x);
   const lightMoved = Math.abs(light.position.x - 2);
   assert.ok(heavyMoved < lightMoved);
+});
+
+test('perfectly elastic head-on collision of equal masses swaps velocities', () => {
+  const a = bodyWithVel(5, 0, 1);
+  const b = bodyWithVel(-5, 0, 1);
+  resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 1);
+  assert.ok(Math.abs(a.velocity.x - -5) < 1e-9);
+  assert.ok(Math.abs(b.velocity.x - 5) < 1e-9);
+});
+
+test('perfectly inelastic collision leaves both bodies at the same normal velocity', () => {
+  const a = bodyWithVel(5, 0, 1);
+  const b = bodyWithVel(-5, 0, 1);
+  resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 0);
+  assert.ok(Math.abs(a.velocity.x - b.velocity.x) < 1e-9);
+});
+
+test('momentum is conserved before and after the collision', () => {
+  const a = bodyWithVel(5, 0, 1); // mass 1
+  const b = bodyWithVel(-2, 0, 0.5); // mass 2
+  const massA = 1 / a.invMass;
+  const massB = 1 / b.invMass;
+  const before = massA * a.velocity.x + massB * b.velocity.x;
+
+  resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 0.7);
+
+  const after = massA * a.velocity.x + massB * b.velocity.x;
+  assert.ok(Math.abs(before - after) < 1e-9);
+});
+
+test('a static body absorbs no velocity change from the impulse', () => {
+  const a = bodyWithVel(0, 0, 0); // static
+  const b = bodyWithVel(-5, 0, 1);
+  resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 1);
+  assert.deepEqual(a.velocity, { x: 0, y: 0 });
+});
+
+test('bodies already separating receive no impulse', () => {
+  const a = bodyWithVel(-5, 0, 1);
+  const b = bodyWithVel(5, 0, 1);
+  resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 1);
+  assert.deepEqual(a.velocity, { x: -5, y: 0 });
+  assert.deepEqual(b.velocity, { x: 5, y: 0 });
 });
