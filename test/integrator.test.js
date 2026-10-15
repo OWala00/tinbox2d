@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createWorld } from '../src/ecs/world.js';
-import { createGravitySystem } from '../src/physics/integrator.js';
+import { createGravitySystem, createDampingSystem } from '../src/physics/integrator.js';
 import { Position, Velocity, Mass } from '../src/ecs/components.js';
 
 test('a free-falling body gains velocity matching g * dt', () => {
@@ -63,4 +63,42 @@ test('many small steps approximate one larger step in the same direction', () =>
 
   const pos = world.getComponent(id, Position);
   assert.ok(pos.y > 0);
+});
+
+test('damping reduces velocity by the expected factor over one tick', () => {
+  const world = createWorld();
+  const dampingSystem = createDampingSystem(0.5);
+  const id = world.createEntity();
+  world.addComponent(id, Velocity, Velocity(10, 0));
+
+  dampingSystem(world, 1 / 60);
+
+  const vel = world.getComponent(id, Velocity);
+  // factor = 1 - damping * dt * 60 = 1 - 0.5 = 0.5
+  assert.ok(Math.abs(vel.x - 5) < 1e-9);
+});
+
+test('velocity below the sleep threshold is flagged sleeping', () => {
+  const world = createWorld();
+  const dampingSystem = createDampingSystem(0.02, 1);
+  const id = world.createEntity();
+  world.addComponent(id, Velocity, Velocity(0.1, 0));
+
+  dampingSystem(world, 1 / 60);
+
+  assert.equal(world.getComponent(id, Velocity).sleeping, true);
+});
+
+test('a sleeping body does not move on the next gravity tick', () => {
+  const world = createWorld();
+  const gravitySystem = createGravitySystem({ x: 0, y: 100 });
+  const id = world.createEntity();
+  world.addComponent(id, Position, Position(3, 3));
+  const vel = Velocity(0, 0);
+  vel.sleeping = true;
+  world.addComponent(id, Velocity, vel);
+
+  gravitySystem(world, 1 / 60);
+
+  assert.deepEqual(world.getComponent(id, Position), { x: 3, y: 3 });
 });
