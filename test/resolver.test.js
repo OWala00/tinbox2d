@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolvePosition, resolveVelocity } from '../src/physics/resolver.js';
+import { resolvePosition, resolveVelocity, resolveFriction } from '../src/physics/resolver.js';
 
 const body = (x, y, invMass) => ({ position: { x, y }, invMass });
 const bodyWithVel = (vx, vy, invMass) => ({ velocity: { x: vx, y: vy }, invMass });
@@ -88,4 +88,51 @@ test('bodies already separating receive no impulse', () => {
   resolveVelocity(a, b, { normal: { x: 1, y: 0 } }, 1);
   assert.deepEqual(a.velocity, { x: -5, y: 0 });
   assert.deepEqual(b.velocity, { x: 5, y: 0 });
+});
+
+test('a sliding box on a static floor decelerates toward zero tangential velocity', () => {
+  const floor = bodyWithVel(0, 0, 0); // static, normal points up (y: -1) from floor to box
+  const box = bodyWithVel(10, 0, 1); // sliding along x, resting on the floor
+  const manifold = { normal: { x: 0, y: -1 } };
+  const normalImpulse = 5; // pretend some normal force is holding it down
+
+  resolveFriction(floor, box, manifold, 0.5, normalImpulse);
+
+  assert.ok(Math.abs(box.velocity.x) < 10);
+});
+
+test('friction impulse magnitude never exceeds friction times the normal impulse', () => {
+  const floor = bodyWithVel(0, 0, 0);
+  const box = bodyWithVel(1000, 0, 1);
+  const manifold = { normal: { x: 0, y: -1 } };
+  const normalImpulse = 2;
+  const friction = 0.3;
+
+  const before = box.velocity.x;
+  resolveFriction(floor, box, manifold, friction, normalImpulse);
+  const velocityChange = Math.abs(box.velocity.x - before);
+  const maxExpectedChange = friction * Math.abs(normalImpulse) * box.invMass;
+
+  assert.ok(velocityChange <= maxExpectedChange + 1e-9);
+});
+
+test('frictionless contact (mu=0) leaves tangential velocity unchanged', () => {
+  const floor = bodyWithVel(0, 0, 0);
+  const box = bodyWithVel(10, 0, 1);
+  const manifold = { normal: { x: 0, y: -1 } };
+
+  resolveFriction(floor, box, manifold, 0, 5);
+
+  assert.ok(Math.abs(box.velocity.x - 10) < 1e-9);
+});
+
+test('no relative sliding means no friction impulse applied', () => {
+  const a = bodyWithVel(3, 0, 1);
+  const b = bodyWithVel(3, 0, 1);
+  const manifold = { normal: { x: 0, y: -1 } };
+
+  resolveFriction(a, b, manifold, 0.5, 5);
+
+  assert.deepEqual(a.velocity, { x: 3, y: 0 });
+  assert.deepEqual(b.velocity, { x: 3, y: 0 });
 });

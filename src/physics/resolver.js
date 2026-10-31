@@ -35,3 +35,33 @@ export function resolveVelocity(a, b, manifold, restitution) {
 
   return j;
 }
+
+// coulomb friction: the tangential impulse is clamped to friction * the
+// normal impulse magnitude from resolveVelocity, so friction can never
+// exceed what the normal force would actually allow.
+export function resolveFriction(a, b, manifold, friction, normalImpulse) {
+  const totalInvMass = a.invMass + b.invMass;
+  if (totalInvMass === 0) return;
+
+  const relVel = { x: b.velocity.x - a.velocity.x, y: b.velocity.y - a.velocity.y };
+  const velAlongNormal = relVel.x * manifold.normal.x + relVel.y * manifold.normal.y;
+  const tangentRaw = {
+    x: relVel.x - manifold.normal.x * velAlongNormal,
+    y: relVel.y - manifold.normal.y * velAlongNormal,
+  };
+  const tangentLen = Math.sqrt(tangentRaw.x * tangentRaw.x + tangentRaw.y * tangentRaw.y);
+  if (tangentLen === 0) return; // no relative sliding, nothing to resist
+
+  const tangent = { x: tangentRaw.x / tangentLen, y: tangentRaw.y / tangentLen };
+  const velAlongTangent = relVel.x * tangent.x + relVel.y * tangent.y;
+
+  let jt = -velAlongTangent / totalInvMass;
+  const maxFriction = friction * Math.abs(normalImpulse);
+  jt = Math.max(-maxFriction, Math.min(maxFriction, jt));
+
+  const impulse = { x: tangent.x * jt, y: tangent.y * jt };
+  a.velocity.x -= impulse.x * a.invMass;
+  a.velocity.y -= impulse.y * a.invMass;
+  b.velocity.x += impulse.x * b.invMass;
+  b.velocity.y += impulse.y * b.invMass;
+}
