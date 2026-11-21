@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Filing cabinet</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; padding: 32px 20px; background: #0d0f12; color: #c9d1dc; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 640px; margin: 0 auto; background: #151922; border: 1px solid #262c38; border-radius: 8px; padding: 24px; }
+    h1 { margin: 0 0 4px; font-size: 24px; }
+    .sub { margin: 0 0 16px; color: #7d8794; font-size: 14px; }
+    .tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+    .tabs button { flex: 1; padding: 8px; background: #1d2330; color: #c9d1dc; border: 1px solid #262c38; border-radius: 6px 6px 0 0; cursor: pointer; font: inherit; }
+    .tabs button[aria-pressed="true"] { background: #4f9dff; color: #0d0f12; border-color: #4f9dff; }
+    form { display: flex; gap: 8px; margin-bottom: 16px; }
+    input[type="text"] { flex: 1; padding: 8px; background: #0d0f12; color: #c9d1dc; border: 1px solid #262c38; border-radius: 6px; font: inherit; }
+    button.primary { padding: 8px 14px; background: #4f9dff; color: #0d0f12; border: 0; border-radius: 6px; cursor: pointer; font: inherit; font-weight: 600; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #262c38; }
+    li span { flex: 1; }
+    li.done span { color: #5b6370; text-decoration: line-through; }
+    li button { background: none; border: 0; color: #7d8794; cursor: pointer; font: inherit; }
+    .empty, .error { color: #7d8794; padding: 12px 0; }
+    .error { color: #ff7b72; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Filing cabinet</h1>
+    <p class="sub">Each tab is an index in IndexedDB. Records stay in this browser.</p>
+    <div class="tabs" id="tabs"></div>
+    <form id="add">
+      <input type="text" id="text" placeholder="New record for this tab" required>
+      <button class="primary" type="submit">File it</button>
+    </form>
+    <ul id="records"></ul>
+    <div class="empty" id="empty" hidden>Nothing filed under this tab.</div>
+    <div class="error" id="error" hidden></div>
+  </main>
+  <script type="module" src="./db.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grandma's house</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; padding: 32px 20px; background: #0d0f12; color: #c9d1dc; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 640px; margin: 0 auto; background: #151922; border: 1px solid #262c38; border-radius: 8px; padding: 24px; }
+    nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+    nav a { padding: 8px 12px; background: #1d2330; border: 1px solid #262c38; border-radius: 6px; color: #4f9dff; text-decoration: none; }
+    nav a[aria-current="page"] { background: #4f9dff; color: #0d0f12; }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    p { margin: 0; color: #9aa3b0; }
+    .back { display: inline-block; margin-top: 16px; color: #4f9dff; }
+  </style>
+</head>
+<body>
+  <main>
+    <nav>
+      <a href="/grandma/routes/">Home</a>
+      <a href="/grandma/routes/living-room">Living room</a>
+      <a href="/grandma/routes/kitchen">Kitchen</a>
+      <a href="/grandma/routes/porch">Porch</a>
+    </nav>
+    <div id="view"></div>
+    <a class="back" href="/grandma/">Back to the demands</a>
+  </main>
+  <script type="module" src="./router.js"></script>
+</body>
+</html>
