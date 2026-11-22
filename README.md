@@ -24,6 +24,22 @@ Then go to http://localhost:8000.
 
 Pick a tool from the toolbar (or press Q, W, E, R) and click in the scene. Right-drag pans and the wheel zooms. Space pauses, N steps once, Backspace clears the bodies, and 1-4 switch scenes.
 
+## Grandma's demands
+
+Three small pages built from a list of demands. They live in `grandma/` and don't touch the sandbox.
+
+- `grandma/no-js/`: HTML and CSS only, no script.
+- `grandma/routes/`: rooms switch with the History API, so moving between them doesn't reload the page.
+- `grandma/db/`: a filing cabinet with records kept in the browser's IndexedDB.
+
+Run them with the included server, which also answers direct links such as `/grandma/routes/kitchen`:
+
+```
+node grandma/serve.js
+```
+
+Then go to http://localhost:8001/grandma/.
+
 ## Tests
 
 ```
