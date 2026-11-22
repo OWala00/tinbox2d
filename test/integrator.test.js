@@ -89,7 +89,7 @@ test('velocity below the sleep threshold is flagged sleeping', () => {
   assert.equal(world.getComponent(id, Velocity).sleeping, true);
 });
 
-test('a sleeping body does not move on the next gravity tick', () => {
+test('the sleeping flag does not stop gravity, so a body at the apex of a swing still falls', () => {
   const world = createWorld();
   const gravitySystem = createGravitySystem({ x: 0, y: 100 });
   const id = world.createEntity();
@@ -100,5 +100,5 @@ test('a sleeping body does not move on the next gravity tick', () => {
 
   gravitySystem(world, 1 / 60);
 
-  assert.deepEqual(world.getComponent(id, Position), { x: 3, y: 3 });
+  assert.ok(world.getComponent(id, Position).y > 3);
 });

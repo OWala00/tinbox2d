@@ -12,7 +12,6 @@ export function createGravitySystem(gravity = { x: 0, y: 500 }) {
       if (!vel || !pos) continue;
       // mass of 0 means static/infinite mass: not affected by gravity.
       if (mass && mass.value === 0) continue;
-      if (vel.sleeping) continue;
 
       vel.x += gravity.x * dt;
       vel.y += gravity.y * dt;

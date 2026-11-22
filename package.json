@@ -4,7 +4,7 @@
   "description": "a small 2d physics engine, built from scratch",
   "type": "module",
   "scripts": {
-    "test": "node --test test/"
+    "test": "node --test test/*.test.js"
   },
   "license": "MIT"
 }

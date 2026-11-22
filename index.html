@@ -2,20 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>tinbox2d</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>tinbox2d — 2D physics sandbox</title>
+  <meta name="description" content="A 2D physics engine built from scratch in plain JavaScript. Drop shapes, grab and throw them, build walls.">
   <style>
-    body { margin: 0; background: #1a1a1a; display: flex; align-items: center; justify-content: center; height: 100vh; }
-    canvas { background: #111; border: 1px solid #333; }
+    :root {
+      --bg: #0d0f12;
+      --panel: #151922;
+      --border: #262c38;
+      --text: #c9d1dc;
+      --muted: #7d8794;
+      --accent: #4f9dff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); overflow: hidden; }
+    body { display: flex; flex-direction: column; font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+
+    #toolbar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px 26px;
+      padding: 10px 14px; background: var(--panel); border-bottom: 1px solid var(--border);
+    }
+    .brand { font-weight: 700; letter-spacing: 0.3px; color: #fff; margin-right: 2px; }
+    .brand span { color: var(--accent); }
+    .group { display: flex; align-items: center; gap: 4px; }
+    .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; margin-right: 4px; }
+
+    button {
+      font: inherit; color: var(--text); background: #1d2330; border: 1px solid var(--border);
+      padding: 6px 11px; border-radius: 6px; cursor: pointer;
+    }
+    button:hover { background: #252c3c; }
+    button.active { background: var(--accent); border-color: var(--accent); color: #06101e; font-weight: 600; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .slider { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .slider output { min-width: 34px; color: var(--text); font-variant-numeric: tabular-nums; }
+    input[type=range] { width: 96px; accent-color: var(--accent); }
+    label.check { display: flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; }
+    input[type=checkbox] { accent-color: var(--accent); }
+
+    #stage { position: relative; flex: 1; min-height: 0; }
+    #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+    #hud {
+      position: absolute; top: 10px; left: 12px; margin: 0; padding: 6px 10px; pointer-events: none;
+      background: rgba(13, 15, 18, 0.78); border: 1px solid var(--border); border-radius: 8px;
+      color: var(--muted); font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre;
+    }
+    #hint {
+      padding: 8px 14px; background: var(--panel); border-top: 1px solid var(--border);
+      color: var(--muted); text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      #hud { font-size: 11px; }
+    }
   </style>
 </head>
 <body>
-  <canvas id="view" width="640" height="480"></canvas>
-  <script type="module">
-    const canvas = document.getElementById('view');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#444';
-    ctx.font = '14px monospace';
-    ctx.fillText('tinbox2d — nothing to simulate yet', 20, 30);
-  </script>
+  <header id="toolbar">
+    <div class="brand">tin<span>box</span>2d</div>
+
+    <div class="group" role="group" aria-label="Tools">
+      <span class="label">Tool</span>
+      <button data-tool="circle" title="Drop circles (Q)">Circle</button>
+      <button data-tool="box" title="Drop boxes (W)">Box</button>
+      <button data-tool="grab" title="Grab and throw (E)">Grab</button>
+      <button data-tool="wall" title="Draw a wall (R)">Wall</button>
+    </div>
+
+    <div class="group" role="group" aria-label="Scenes">
+      <span class="label">Scene</span>
+      <button data-scene="4" title="Sandbox (4)">Sandbox</button>
+      <button data-scene="1" title="Balls (1)">Balls</button>
+      <button data-scene="2" title="Pyramid (2)">Pyramid</button>
+      <button data-scene="3" title="Pendulum (3)">Pendulum</button>
+    </div>
+
+    <div class="group" role="group" aria-label="Simulation">
+      <button id="pause" title="Pause or resume (Space)">Pause</button>
+      <button id="step" title="Advance one step (N)">Step</button>
+      <button id="clear" title="Remove all movable bodies (Backspace)">Clear</button>
+    </div>
+
+    <div class="group" role="group" aria-label="Settings">
+      <label class="slider">Gravity <input id="gravity" type="range" min="0" max="1500" step="50" value="600"><output id="gravity-out">600</output></label>
+      <label class="slider">Bounce <input id="bounce" type="range" min="0" max="1" step="0.05" value="0.5"><output id="bounce-out">0.5</output></label>
+      <label class="check"><input id="velocity" type="checkbox"> Velocity (V)</label>
+    </div>
+  </header>
+
+  <main id="stage">
+    <canvas id="view"></canvas>
+    <pre id="hud"></pre>
+  </main>
+  <footer id="hint"></footer>
+
+  <script type="module" src="./demo/main.js"></script>
 </body>
 </html>
